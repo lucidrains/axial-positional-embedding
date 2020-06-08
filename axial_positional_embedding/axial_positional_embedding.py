@@ -4,19 +4,25 @@ from operator import mul
 from functools import reduce
 
 class AxialPositionalEmbedding(nn.Module):
-    def __init__(self, dim, axial_shape = ()):
+    def __init__(self, dim, axial_shape, axial_dims = None):
         super().__init__()
 
         self.dim = dim
         self.shape = axial_shape
         self.max_seq_len = reduce(mul, axial_shape, 1)
 
+        self.summed = axial_dims is None
+        axial_dims = ((dim,) * len(axial_shape)) if self.summed else axial_dims
+
+        assert len(self.shape) == len(axial_dims), 'number of axial dimensions must equal the number of dimensions in the shape'
+        assert self.summed or not self.summed and sum(axial_dims) == dim, f'axial dimensions must sum up to the target dimension {dim}'
+
         self.weights = ParameterList(self, 'weights', len(axial_shape))
 
-        for ind, shape in enumerate(self.shape):
+        for ind, (shape, axial_dim) in enumerate(zip(self.shape, axial_dims)):
             ax_shape = [1] * len(self.shape)
             ax_shape[ind] = shape
-            ax_shape = (1, *ax_shape, dim)
+            ax_shape = (1, *ax_shape, axial_dim)
             ax_emb = nn.Parameter(torch.zeros(ax_shape).normal_(0, 1))
             self.weights.append(ax_emb)
 
@@ -26,11 +32,12 @@ class AxialPositionalEmbedding(nn.Module):
         embs = []
 
         for ax_emb in self.weights.to_list():
-            expand_shape = (b, *self.shape, self.dim)
-            emb = ax_emb.expand(expand_shape).reshape(b, self.max_seq_len, self.dim)
+            axial_dim = ax_emb.shape[-1]
+            expand_shape = (b, *self.shape, axial_dim)
+            emb = ax_emb.expand(expand_shape).reshape(b, self.max_seq_len, axial_dim)
             embs.append(emb)
 
-        pos_emb = sum(embs)
+        pos_emb = sum(embs) if self.summed else torch.cat(embs, dim=-1)
         return pos_emb[:, :t].to(x)
 
 # a mock parameter list object until below issue is resolved
