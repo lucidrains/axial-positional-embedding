@@ -13,6 +13,17 @@ $ pip install axial-positional-embedding
 ## Usage
 
 ```python
+import torch
+from axial_positional_embedding import AxialPositionalEmbedding
+
+pos_emb = AxialPositionalEmbedding(
+    dim = 512,
+    max_seq_len = 4096,
+    axial_shape = (64, 64)          # axial shape must multiply up to the max_seq_len (64 * 64 = 4096)
+)
+
+tokens = torch.randn(1, 1024, 512)  # assume are tokens
+tokens = pos_emb(tokens) + tokens   # add positional embedding to token embeddings
 ```
 
 ## Citations
