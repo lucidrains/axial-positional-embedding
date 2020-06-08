@@ -4,13 +4,12 @@ from operator import mul
 from functools import reduce
 
 class AxialPositionalEmbedding(nn.Module):
-    def __init__(self, dim, max_seq_len, axial_shape = ()):
+    def __init__(self, dim, axial_shape = ()):
         super().__init__()
-        assert reduce(mul, axial_shape, 1) == max_seq_len, 'axial position shape must multiply up to max sequence length'
 
         self.dim = dim
-        self.seq_len = max_seq_len
         self.shape = axial_shape
+        self.max_seq_len = reduce(mul, axial_shape, 1)
 
         self.weights = ParameterList(self, 'weights', len(axial_shape))
 
@@ -23,11 +22,12 @@ class AxialPositionalEmbedding(nn.Module):
 
     def forward(self, x):
         b, t, e = x.shape
+        assert (t < self.max_seq_len), f'Sequence length ({t}) must be less than the maximum sequence length allowed ({self.max_seq_len})'
         embs = []
 
         for ax_emb in self.weights.to_list():
             expand_shape = (b, *self.shape, self.dim)
-            emb = ax_emb.expand(expand_shape).reshape(b, self.seq_len, self.dim)
+            emb = ax_emb.expand(expand_shape).reshape(b, self.max_seq_len, self.dim)
             embs.append(emb)
 
         pos_emb = sum(embs)
