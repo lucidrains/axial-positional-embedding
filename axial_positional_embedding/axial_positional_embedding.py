@@ -59,3 +59,16 @@ class ParameterList(object):
     def to_list(self):
         return [getattr(self.kls, self._keyname(self.prefix, i)) for i in range(self.length)]
 
+# Axial Positional Embedding for Images
+
+class AxialPositionalEmbeddingImages(nn.Module):
+    def __init__(self, dim, axial_shape, axial_dims = None):
+        super().__init__()
+        assert len(axial_shape) == 2, 'Axial shape must have 2 dimensions for images'
+        self.pos_emb = AxialPositionalEmbedding(dim, axial_shape, axial_dims)
+
+    def forward(self, img):
+        b, c, h, w = img.shape
+        img = img.permute(0, 2, 3, 1).reshape(b, h * w, c)
+        pos_emb = self.pos_emb(img)
+        return pos_emb.reshape(b, h, w, c).permute(0, 3, 1, 2)
