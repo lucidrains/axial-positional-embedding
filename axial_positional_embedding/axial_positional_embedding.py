@@ -61,7 +61,7 @@ class ParameterList(object):
 
 # Axial Positional Embedding for Images
 
-class AxialPositionalEmbeddingImages(nn.Module):
+class AxialPositionalEmbeddingImage(nn.Module):
     def __init__(self, dim, axial_shape, axial_dims = None):
         super().__init__()
         assert len(axial_shape) == 2, 'Axial shape must have 2 dimensions for images'
