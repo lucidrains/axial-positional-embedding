@@ -1,4 +1,4 @@
-# Axial Positional Embedding
+## Axial Positional Embedding
 
 [![PyPI version](https://badge.fury.io/py/axial-positional-embedding.svg)](https://badge.fury.io/py/axial-positional-embedding)
 
