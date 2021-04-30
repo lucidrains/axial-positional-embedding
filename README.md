@@ -29,6 +29,16 @@ tokens = pos_emb(tokens) + tokens   # add positional embedding to token embeddin
 ## Citations
 
 ```bibtex
+@inproceedings{kitaev2020reformer,
+    title       = {Reformer: The Efficient Transformer},
+    author      = {Nikita Kitaev and Lukasz Kaiser and Anselm Levskaya},
+    booktitle   = {International Conference on Learning Representations},
+    year        = {2020},
+    url         = {https://openreview.net/forum?id=rkgNKkHtvB}
+}
+```
+
+```bibtex
 @misc{ho2019axial,
     title = {Axial Attention in Multidimensional Transformers},
     author = {Jonathan Ho and Nal Kalchbrenner and Dirk Weissenborn and Tim Salimans},
