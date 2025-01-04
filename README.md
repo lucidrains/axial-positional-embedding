@@ -40,9 +40,9 @@ tokens = pos_emb(tokens) + tokens   # add positional embedding to token embeddin
 
 ```bibtex
 @misc{ho2019axial,
-    title = {Axial Attention in Multidimensional Transformers},
-    author = {Jonathan Ho and Nal Kalchbrenner and Dirk Weissenborn and Tim Salimans},
-    year = {2019},
+    title   = {Axial Attention in Multidimensional Transformers},
+    author  = {Jonathan Ho and Nal Kalchbrenner and Dirk Weissenborn and Tim Salimans},
+    year    = {2019},
     archivePrefix = {arXiv}
 }
 ```
