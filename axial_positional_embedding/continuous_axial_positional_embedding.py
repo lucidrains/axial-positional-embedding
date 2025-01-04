@@ -21,7 +21,7 @@ def MLP(
     expansion = 2
 ):
     curr_dim = dim_in
-    dim_hidden = expansion * max(dim_in, dim_out)
+    dim_hidden = int(expansion * max(dim_in, dim_out))
 
     layers = []
 
@@ -42,9 +42,10 @@ class ContinuousAxialPositionalEmbedding(Module):
         dim,
         num_axial_dims,
         mlp_depth = 2,
+        mlp_expansion = 2.
     ):
         super().__init__()        
-        self.mlps = ModuleList([MLP(1, dim) for _ in range(num_axial_dims)])
+        self.mlps = ModuleList([MLP(1, dim, depth = mlp_depth, expansion = mlp_expansion) for _ in range(num_axial_dims)])
 
         self.register_buffer('dummy', tensor(0), persistent = False)
 
