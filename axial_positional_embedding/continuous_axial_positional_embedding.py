@@ -2,7 +2,7 @@ from __future__ import annotations
 from itertools import zip_longest
 
 import torch
-from torch import nn, tensor, Tensor
+from torch import nn, tensor, Size, Tensor
 from torch.nn import Module, ModuleList
 
 from einops import rearrange
@@ -76,7 +76,7 @@ class ContinuousAxialPositionalEmbedding(Module):
 
     def forward(
         self,
-        axial_dims: tuple[int, ...],
+        axial_dims: Tensor | Size | tuple[int, ...],
         return_factorized = False   # whether to return list[Tensor] of factorized axial positional embeddings
     ):
         axial_embeds = []
