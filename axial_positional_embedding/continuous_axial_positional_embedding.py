@@ -2,7 +2,7 @@ from __future__ import annotations
 from itertools import zip_longest
 
 import torch
-from torch import nn, tensor
+from torch import nn, tensor, Tensor
 from torch.nn import Module, ModuleList
 
 from einops import rearrange
