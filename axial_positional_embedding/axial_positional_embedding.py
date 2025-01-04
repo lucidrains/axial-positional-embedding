@@ -19,7 +19,8 @@ def exists(v):
 class AxialPositionalEmbedding(Module):
     def __init__(
         self,
-        dim, axial_shape: tuple[int, ...],
+        dim,
+        axial_shape: tuple[int, ...],
         axial_dims: tuple[int, ...] | None = None
     ):
         super().__init__()

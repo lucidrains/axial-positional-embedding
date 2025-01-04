@@ -26,6 +26,24 @@ tokens = torch.randn(1, 1024, 512)  # assume are tokens
 tokens = pos_emb(tokens) + tokens   # add positional embedding to token embeddings
 ```
 
+A continuous version with better extrapolation ability (each axis parameterized by a 2 layer MLP)
+
+```python
+import torch
+from axial_positional_embedding import ContinuousAxialPositionalEmbedding
+
+pos_emb = ContinuousAxialPositionalEmbedding(
+    dim = 512,
+    num_axial_dims = 3
+)
+
+tokens = torch.randn(1, 8, 16, 32, 512) # say a video with 8 frames, 16 x 32 image dimension
+
+axial_pos_emb = pos_emb((8, 16, 32)) # pass in the size from above
+
+tokens = axial_pos_emb + tokens   # add positional embedding to token embeddings
+```
+
 ## Citations
 
 ```bibtex
