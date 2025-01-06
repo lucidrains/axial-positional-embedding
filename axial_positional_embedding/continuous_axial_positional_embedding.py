@@ -56,7 +56,8 @@ class ContinuousAxialPositionalEmbedding(Module):
     def combine_factorized(
         self,
         axial_embeds: list[Tensor],
-        axial_dims: tuple[int, ...] | None = None
+        axial_dims: tuple[int, ...] | None = None,
+        flatten = False
     ):
         if not exists(axial_dims):
             axial_dims = tuple(axial_embed.shape[0] for axial_embed in axial_embeds)
@@ -72,12 +73,16 @@ class ContinuousAxialPositionalEmbedding(Module):
 
         assert axial_embed.shape[:-1] == axial_dims
 
+        if flatten:
+            axial_embed = rearrange(axial_embed, '... d -> (...) d')
+
         return axial_embed
 
     def forward(
         self,
         axial_dims: Tensor | Size | tuple[int, ...],
-        return_factorized = False   # whether to return list[Tensor] of factorized axial positional embeddings
+        return_factorized = False,   # whether to return list[Tensor] of factorized axial positional embeddings
+        flatten = False,             # whether to flatten axial dims
     ):
         axial_embeds = []
 
@@ -88,7 +93,9 @@ class ContinuousAxialPositionalEmbedding(Module):
             axial_embeds.append(axial_embed)
 
         if return_factorized:
+            assert not flatten
+
             # needed for Transfusion
             return axial_embeds
 
-        return self.combine_factorized(axial_embeds)
+        return self.combine_factorized(axial_embeds, flatten = flatten)
