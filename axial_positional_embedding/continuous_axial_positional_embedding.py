@@ -90,24 +90,34 @@ class ContinuousAxialPositionalEmbedding(Module):
         ndims = self.num_axial_dims
         assert len(axial_dims) in (ndims, ndims - 1)
 
-        if len(axial_dims) == (ndims - 1):
-            stride = reduce(mul, (*axial_dims,))
+        if len(axial_dims) == ndims:
+            return axial_dims
 
-            outer_dim = ceil(max_seq_len / stride)
-            axial_dims = (outer_dim, *axial_dims)
+        stride = reduce(mul, (*axial_dims,))
 
-        return axial_dims
+        outer_dim = ceil(max_seq_len / stride)
+        return (outer_dim, *axial_dims)
 
     def forward_with_seq_len(
         self,
         seq_len: int,
         axial_dims: Tensor | Size | tuple[int, ...] = (),
+        *,
+        factorized: list[Tensor] | None = None,
+        return_factorized = False
     ):
-        axial_dims = self.maybe_derive_outer_dim(seq_len, axial_dims)
+        if not exists(factorized):
+            axial_dims = self.maybe_derive_outer_dim(seq_len, axial_dims)
+            factorized = self.forward(axial_dims, return_factorized = True)
 
-        axial_embeds = self.forward(axial_dims, flatten = True)
+        axial_embeds = self.combine_factorized(factorized, flatten = True)
 
-        return axial_embeds[:seq_len]
+        axial_embeds = axial_embeds[:seq_len]
+
+        if not return_factorized:
+            return axial_embeds
+
+        return axial_embeds, factorized
 
     def forward_with_pos(
         self,
