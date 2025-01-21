@@ -82,10 +82,10 @@ class ContinuousAxialPositionalEmbedding(Module):
 
         return axial_embed
 
-    def forward_with_seq_len(
+    def maybe_derive_outer_dim(
         self,
-        seq_len: int,
-        axial_dims: Tensor | Size | tuple[int, ...] = (),
+        max_seq_len,
+        axial_dims: Tensor | Size | tuple[int, ...]
     ):
         ndims = self.num_axial_dims
         assert len(axial_dims) in (ndims, ndims - 1)
@@ -93,12 +93,40 @@ class ContinuousAxialPositionalEmbedding(Module):
         if len(axial_dims) == (ndims - 1):
             stride = reduce(mul, (*axial_dims,))
 
-            outer_dim = ceil(seq_len / stride)
+            outer_dim = ceil(max_seq_len / stride)
             axial_dims = (outer_dim, *axial_dims)
+
+        return axial_dims
+
+    def forward_with_seq_len(
+        self,
+        seq_len: int,
+        axial_dims: Tensor | Size | tuple[int, ...] = (),
+    ):
+        axial_dims = self.maybe_derive_outer_dim(seq_len, axial_dims)
 
         axial_embeds = self.forward(axial_dims, flatten = True)
 
         return axial_embeds[:seq_len]
+
+    def forward_with_pos(
+        self,
+        pos: Tensor,
+        axial_dims: Tensor | Size | tuple[int, ...] = (),
+    ):
+        assert pos.dtype in (torch.int, torch.long)
+
+        max_pos = pos.amax().item() + 1
+        axial_dims = self.maybe_derive_outer_dim(max_pos, axial_dims)
+        indices = torch.unravel_index(pos, axial_dims)
+
+        axial_embed = 0.
+
+        for mlp, axial_index in zip(self.mlps, indices):
+            axial_index = rearrange(axial_index, '... -> ... 1')
+            axial_embed = axial_embed + mlp(axial_index.float())
+
+        return axial_embed
 
     def forward(
         self,
