@@ -1,4 +1,7 @@
 from __future__ import annotations
+from math import ceil
+from functools import reduce
+from operator import mul
 from itertools import zip_longest
 
 import torch
@@ -44,7 +47,8 @@ class ContinuousAxialPositionalEmbedding(Module):
         mlp_depth = 2,
         mlp_expansion = 2.
     ):
-        super().__init__()        
+        super().__init__()
+        self.num_axial_dims = num_axial_dims
         self.mlps = ModuleList([MLP(1, dim, depth = mlp_depth, expansion = mlp_expansion) for _ in range(num_axial_dims)])
 
         self.register_buffer('dummy', tensor(0), persistent = False)
@@ -77,6 +81,24 @@ class ContinuousAxialPositionalEmbedding(Module):
             axial_embed = rearrange(axial_embed, '... d -> (...) d')
 
         return axial_embed
+
+    def forward_with_seq_len(
+        self,
+        seq_len: int,
+        axial_dims: Tensor | Size | tuple[int, ...] = (),
+    ):
+        ndims = self.num_axial_dims
+        assert len(axial_dims) in (ndims, ndims - 1)
+
+        if len(axial_dims) == (ndims - 1):
+            stride = reduce(mul, (*axial_dims,))
+
+            outer_dim = ceil(seq_len / stride)
+            axial_dims = (outer_dim, *axial_dims)
+
+        axial_embeds = self.forward(axial_dims, flatten = True)
+
+        return axial_embeds[:seq_len]
 
     def forward(
         self,
