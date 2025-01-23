@@ -57,6 +57,10 @@ class ContinuousAxialPositionalEmbedding(Module):
     def device(self):
         return self.dummy.device
 
+    @property
+    def dtype(self):
+        return next(self.mlps.parameters()).dtype
+
     def combine_factorized(
         self,
         axial_embeds: list[Tensor],
@@ -134,7 +138,7 @@ class ContinuousAxialPositionalEmbedding(Module):
 
         for mlp, axial_index in zip(self.mlps, indices):
             axial_index = rearrange(axial_index, '... -> ... 1')
-            axial_embed = axial_embed + mlp(axial_index.float())
+            axial_embed = axial_embed + mlp(axial_index.to(self.dtype))
 
         return axial_embed
 
@@ -147,7 +151,7 @@ class ContinuousAxialPositionalEmbedding(Module):
         axial_embeds = []
 
         for mlp, axial_dim in zip(self.mlps, axial_dims):
-            seq = torch.arange(axial_dim, device = self.device, dtype = torch.float)
+            seq = torch.arange(axial_dim, device = self.device, dtype = self.dtype)
             axial_embed = mlp(rearrange(seq, 'n -> n 1'))
 
             axial_embeds.append(axial_embed)
