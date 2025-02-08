@@ -47,7 +47,7 @@ class AxialPositionalEmbedding(Module):
     def forward(self, x):
 
         batch, seq_len, _ = x.shape
-        assert (seq_len <= self.max_seq_len), f'Sequence length ({seq}) must be less than the maximum sequence length allowed ({self.max_seq_len})'
+        assert (seq_len <= self.max_seq_len), f'Sequence length ({seq_len}) must be less than the maximum sequence length allowed ({self.max_seq_len})'
 
         embs = []
 
