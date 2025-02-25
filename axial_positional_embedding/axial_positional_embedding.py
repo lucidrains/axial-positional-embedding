@@ -81,5 +81,5 @@ class AxialPositionalEmbeddingImage(Module):
         pos_emb = self.pos_emb(img)
 
         pos_emb, = unpack(pos_emb, packed_shape, 'b * c')
-        pos_emb = rearrange(pos_meb, 'b h w c -> b c h w')
+        pos_emb = rearrange(pos_emb, 'b h w c -> b c h w')
         return pos_emb
